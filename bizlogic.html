@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Adnroid前端逻辑</title>
+<title>bizLogic</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <style type="text/css">
 /* GitHub stylesheet for MarkdownPad (http://markdownpad.com) */
@@ -341,9 +341,79 @@ img {
 <hr />
 <h1>详情页</h1>
 <ol>
-<li>从往期进入详情页，如果本期状态为系统异常，此时是否需要盖上<strong>已成交</strong>的水印？</li>
-<li></li>
+<li>
+启动场景：
+<ul>
+<li>只传入ProductId；</li>
+<li>只传入新用户的ProductId；</li>
+<li>传入PeriodId；  
+</li>
+</ul>
+</li>
+<li>若只有ProductId，则默认通过ProductId查询最新期，若获取到最新期数列表为空，则判定为<strong>商品已下架</strong>。若最新期数列表不为空，则获取到最新一期的PeriodId；</li>
+<li>
+通过 PeriodId 或者新用户的 ProductId 查询最新一期详情。1）若查询失败，则默认<strong>弹toast告知用户原因</strong>，未关闭 加载框，并终止后续操作；2）若查询成功，<strong>关闭加载框</strong>，并更新页面UI，如下：
+<ul>
+<li>商品图片集</li>
+<li>专区角标图片</li>
+<li>市场价格</li>
+<li>商品标题</li>
+<li>可否差价购买</li>
+<li>竞拍细则（起拍价、加价幅度...）</li>
+<li>底部是否收藏</li>
+<li>底部每次竞拍的手续费</li>
+<li>底部默认出价</li>
+<li>
+判定当前一期状态
+<ul>
+<li>
+判定本期为结束或异常
+<ul>
+<li>停止轮询最新竞拍价任务/停止轮询竞拍助手任务</li>
+<li>设置倒计时为结束状态</li>
+<li>设置 水印 图，并停止图片集的滚动</li>
+<li>更新我的消耗</li>
+<li>更新底部视图（前往下期/返币/差价购等）</li>
+<li>若可分享，则添加分享按钮</li>
+<li><strong>若本期异常，则弹框告知用户系统异常</strong></li>
+</ul>
+</li>
+<li>
+判定本期为首次倒计时或正在拍
+<ul>
+<li>开启轮询最新竞拍价任务</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+在步骤3中更新视图的同时，并发执行请求本期<strong>晒单、往期成交、竞拍规则</strong>，等待数据全部获取到，按照如下优先级显示：
+<ul>
+<li>若有晒单，优先显示晒单；</li>
+<li>若无晒单，且有往期成交，则显示往期成交；</li>
+<li>既无晒单，又无往期成交，则显示竞拍规则。</li>
+</ul>
+</li>
+<li>
+在步骤3中更新视图的同时，并发执行请求最近3条出价记录，若查询成功，则：
+<ul>
+<li>显示最新出价记录</li>
+<li>
+判定当前一期状态为结束或异常
+<ul>
+<li>更新当前竞拍价</li>
+<li>更新竞价状态说明（恭喜您/本次竞拍结束）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>轮询最新竞拍价任务</strong>，默认500ms发起一次请求</li>
 </ol>
+<p>问题：<br />
+1. 从往期进入详情页，如果本期状态为系统异常，此时是否需要盖上<strong>已成交</strong>的水印？<br />
+2. 断网或者网络一直失败，应该取消 加载框，加载 网络失败 页面？</p>
 
 </body>
 </html>
